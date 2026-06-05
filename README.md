@@ -9,5 +9,5 @@ ASGI server for Python applications.
 
 ### Install
 ```
-pip install acrornio
+pip install acornio
 ```

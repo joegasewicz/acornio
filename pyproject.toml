@@ -17,5 +17,11 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pytest (>=9.0.3,<10.0.0)"
+    "pytest (>=9.0.3,<10.0.0)",
+    "setuptools (>=82.0.1,<83.0.0)",
+    "twine (>=6.2.0,<7.0.0)",
+    "tox (>=4.55.1,<5.0.0)",
+    "pylint (>=4.0.5,<5.0.0)",
+    "sphinx (>=9.1.0,<10.0.0)",
+    "wheel (>=0.47.0,<0.48.0)"
 ]
