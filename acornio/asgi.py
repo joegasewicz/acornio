@@ -1,6 +1,8 @@
+from typing import Awaitable, Callable, MutableMapping, Any
 
 
-class AcornIO:
-
-    def __init__(self):
-        pass
+Scope = MutableMapping[str, Any]
+Message = MutableMapping[str, Any]
+Receive = Callable[[], Awaitable[Message]]
+Send = Callable[[Message], Awaitable[None]]
+ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
