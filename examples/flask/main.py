@@ -1,4 +1,8 @@
+import asyncio
+
 from flask import Flask
+from acornio import AcornIO
+
 
 app = Flask(__name__)
 
@@ -9,4 +13,5 @@ async def home():
 
 
 if __name__ == "__main__":
-    app.run(port=8889)
+    server = AcornIO(application=app)
+    asyncio.run(server.serve())
