@@ -16,5 +16,4 @@ tox:
 	poetry run tox
 
 release:
-	poetry run python setup.py sdist
-	poetry run twine upload dist/* --verbose
+	poetry publish --build

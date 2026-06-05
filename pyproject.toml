@@ -1,6 +1,6 @@
 [project]
 name = "acornio"
-version = "0.0.1"
+version = "0.0.2"
 description = "AcornIO is a modern ASGI server built for Python ASGI applications."
 authors = [
     {name = "joegasewicz",email = "joegasewicz@users.noreply.github.com"}
