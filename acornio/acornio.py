@@ -1,4 +1,6 @@
 import asyncio
+from http.client import parse_headers
+from io import BytesIO
 
 from acornio.asgi import ASGIApp
 from acornio.logger import log, print_preamble
@@ -47,5 +49,13 @@ class AcornIO:
                 "headers": [(b"content-type", b"text/plain")],
             }
         """
-        read_bytes = await reader.readuntil(b"\r\n\r\n")
-        log.info(f"here -----------> {read_bytes}")
+        raw_request = await reader.readuntil(b"\r\n\r\n")
+        method, host, raw_headers  = raw_request.split(b"\r\n", 2)
+
+
+        parsed_headers = parse_headers(BytesIO(raw_headers))
+
+        print(f"raw request: {raw_request}")
+        print(f"Method: {method}")
+        print(f"Host: {host}")
+        print(f"Parsed headers: {parsed_headers}")
