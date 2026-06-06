@@ -1,7 +1,7 @@
 import asyncio
 
 from acornio.asgi import ASGIApp
-from acornio.logger import log
+from acornio.logger import log, print_preamble
 
 
 class AcornIO:
@@ -23,6 +23,7 @@ class AcornIO:
             self.host,
             self.port,
         )
+        print_preamble()
         log.info(f"Starting server on http://{self.host}:{self.port}")
         async  with server:
             await server.serve_forever()
