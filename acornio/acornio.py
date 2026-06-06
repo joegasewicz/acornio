@@ -1,6 +1,7 @@
 import asyncio
 
 from acornio.asgi import ASGIApp
+from acornio.logger import log
 
 
 class AcornIO:
@@ -22,23 +23,28 @@ class AcornIO:
             self.host,
             self.port,
         )
-
+        log.info(f"Starting server on http://{self.host}:{self.port}")
         async  with server:
             await server.serve_forever()
 
     async def handle_connection(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
-        raw_request = await reader.read(65536)
+        """
+        # parse HTTP bytes into method/path/headers/body
+        # build ASGI scope
+        # define receive()
+        # define send()
+        # await self.application(scope, receive, send)
+        # write HTTP response back with writer.write(...)
+        # close the connection
 
+        it does not return the ASGI scope, it builds it and passes it to self.application(scope, receive, send)
 
-    async def parse_request(self, raw_request: bytes) -> tuple[str, str, list[tuple[bytes, bytes]]]:
-        head = raw_request.split(b"\r\n\r\n", 1)[0]
-
-    async def build_response(
-        self,
-        status: int,
-        headers: list[tuple[bytes, bytes]],
-        body: bytes,
-    ) -> bytes:
-        reason = {
-            "200":
-        }
+        app response through send -
+            {
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [(b"content-type", b"text/plain")],
+            }
+        """
+        read_bytes = await reader.readuntil(b"\r\n\r\n")
+        log.info(f"here -----------> {read_bytes}")
