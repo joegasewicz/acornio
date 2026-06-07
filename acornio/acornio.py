@@ -2,9 +2,14 @@ import asyncio
 from http.client import parse_headers
 from io import BytesIO
 
+
 from acornio.asgi import ASGIApp
 from acornio.logger import log, print_preamble
-from acornio.exceptions import HTTPVersionUnsupportedError
+from acornio.utils import get_raw_path
+from acornio.exceptions import (
+    HTTPVersionUnsupportedError,
+    InvalidSSLContextError,
+)
 
 
 DEFAULT_HTTP_VERSION = "1.1"
@@ -18,10 +23,17 @@ class AcornIO:
             *,
             host: str = "localhost",
             port: int = 8000,
+            ssl_context: str = None,
+            ssl_certfile: str = None,
+            ssl_keyfile: str = None,
+
     ):
         self.application = application
         self.host = host
         self.port = port
+        self.ssl_context = ssl_context
+        self.ssl_certfile = ssl_certfile
+        self.ssl_keyfile = ssl_keyfile
 
     async def serve(self) -> None:
         server = await asyncio.start_server(
@@ -79,10 +91,13 @@ class AcornIO:
         :return:
         """
         try:
-            valid_version = self._get_http_version(version="HTTP / 2.0")
+            valid_version = self._get_http_version(version=version)
         except HTTPVersionUnsupportedError as err:
             valid_version = DEFAULT_HTTP_VERSION
-            log.error(f"Error for unsupported HTTP version. Defaulting to {DEFAULT_HTTP_VERSION}", exc_info=True)
+            log.error(
+                f"Error for unsupported HTTP version. Defaulting to {DEFAULT_HTTP_VERSION}",
+                exc_info=True,
+            )
 
         scope = {
             "type": "http",
@@ -91,7 +106,8 @@ class AcornIO:
                 "spec_version": "2.0",
             },
             "http_version": valid_version,
-
+            "scheme": self._get_schema(),
+            "path": get_raw_path(path=path),
         }
         log.debug(f"Scope:\n\t{scope}")
         return scope
@@ -105,3 +121,12 @@ class AcornIO:
             raise HTTPVersionUnsupportedError(
                 "AcornIO currently only supports HTTP versions <= 1.1"
             )
+
+    def _get_schema(self) -> str:
+        if self.ssl_context is None and self.ssl_certfile and self.ssl_keyfile:
+            return "https"
+        if self.ssl_context not in ["http", "https"]:
+            raise InvalidSSLContextError()
+        return self.ssl_context
+
+
