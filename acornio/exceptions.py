@@ -1,0 +1,2 @@
+class HTTPVersionUnsupportedError(Exception):
+    pass

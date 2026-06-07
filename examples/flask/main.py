@@ -1,4 +1,7 @@
 import asyncio
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 from flask import Flask
 from acornio import AcornIO

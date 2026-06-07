@@ -8,7 +8,7 @@ optional = false
 python-versions = ">=3.13"
 groups = ["main"]
 files = []
-develop = false
+develop = true
 
 [package.source]
 type = "directory"
@@ -244,4 +244,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "d7f8d460a61c63e32887bfa3124063b4902acebb2c93681586abf4a8c9338119"
+content-hash = "b830b04e22f33e501b9ec134a71b70c31e989902eee1bb225f1868cd624731c2"
