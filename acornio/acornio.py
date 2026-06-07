@@ -4,6 +4,10 @@ from io import BytesIO
 
 from acornio.asgi import ASGIApp
 from acornio.logger import log, print_preamble
+from acornio.exceptions import HTTPVersionUnsupportedError
+
+
+DEFAULT_HTTP_VERSION = "1.1"
 
 
 class AcornIO:
@@ -50,12 +54,54 @@ class AcornIO:
             }
         """
         raw_request = await reader.readuntil(b"\r\n\r\n")
-        method, host, raw_headers  = raw_request.split(b"\r\n", 2)
+        raw_method, host, raw_headers  = raw_request.split(b"\r\n", 2)
 
 
         parsed_headers = parse_headers(BytesIO(raw_headers))
 
-        print(f"raw request: {raw_request}")
-        print(f"Method: {method}")
-        print(f"Host: {host}")
-        print(f"Parsed headers: {parsed_headers}")
+        method, path, version = raw_method.decode().split()
+
+        scope = self._build_scope(
+            method=method,
+            path=path,
+            version=version,
+        )
+
+    def _build_scope(
+        self,
+        *,
+        method: str,
+        path: str,
+        version: str,
+    ) -> dict:
+        """
+        Ref: https://asgi.readthedocs.io/en/stable/specs/www.html#http-connection-scope
+        :return:
+        """
+        try:
+            valid_version = self._get_http_version(version="HTTP / 2.0")
+        except HTTPVersionUnsupportedError as err:
+            valid_version = DEFAULT_HTTP_VERSION
+            log.error(f"Error for unsupported HTTP version. Defaulting to {DEFAULT_HTTP_VERSION}", exc_info=True)
+
+        scope = {
+            "type": "http",
+            "asgi": {
+                "version": "3.0",
+                "spec_version": "2.0",
+            },
+            "http_version": valid_version,
+
+        }
+        log.debug(f"Scope:\n\t{scope}")
+        return scope
+
+    def _get_http_version(self, *, version: str) -> str | None:
+        # E.g version = HTTP / 1.1
+        version = version.split("/")[1]
+        if version == "1.1" or version == "1.0":
+            return version
+        else:
+            raise HTTPVersionUnsupportedError(
+                "AcornIO currently only supports HTTP versions <= 1.1"
+            )

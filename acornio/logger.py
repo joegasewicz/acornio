@@ -12,11 +12,27 @@ class Color(StrEnum):
     RESET = "\033[0m"
 
 
-def color_formating() -> str:
-    fmt = Color.CYAN + "{asctime} " + Color.RESET
-    fmt += "[🐿️" + Color.GREEN + "AcornIO" + Color.RESET + "] "
-    fmt += Color.CYAN + "{message}" + Color.RESET
-    return fmt
+class CustomFormatter(logging.Formatter):
+
+    COLOR = {
+        "DEBUG": Color.MAGENTA,
+        "INFO": Color.CYAN,
+        "WARNING": Color.YELLOW,
+        "ERROR": Color.RED,
+        "CRITICAL": Color.RED,
+    }
+
+    def format(self, record):
+        color = self.COLOR.get(record.levelname, Color.RESET)
+
+        self._style._fmt = self.__color_formating(color=color)
+        return super().format(record)
+
+    def __color_formating(self, *, color: str) -> str:
+        fmt = color + "{asctime} " + Color.RESET
+        fmt += "[🐿️" + Color.GREEN + "AcornIO" + Color.RESET + "] "
+        fmt += color + "{levelname}: {message}" + Color.RESET
+        return fmt
 
 
 logging.basicConfig(
@@ -24,20 +40,20 @@ logging.basicConfig(
 )
 
 # Logger
-log = logging.getLogger(__name__)
+log = logging.getLogger("acornio")
 bare_log = logging.getLogger("bare")
 log.propagate = False
 bare_log.propagate = False
 
 # Handlers
 console_handler = logging.StreamHandler()
+console_handler.setLevel(level=logging.INFO)
 log.addHandler(console_handler)
 bare_handler = logging.StreamHandler()
 bare_log.addHandler(bare_handler)
 
 # Formatters
-formatter = logging.Formatter(
-    color_formating(),
+formatter = CustomFormatter(
     style="{",
     datefmt="%Y-%m-%d %H:%M",
 )
